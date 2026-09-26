@@ -49,12 +49,42 @@ const createFailure = async (req, res) => {
   }
 };
 
-// @desc    Get all failures for logged-in user
+// @desc    Get all failures for logged-in user with optional search & filters
 // @route   GET /api/failures
 // @access  Private
 const getFailures = async (req, res) => {
   try {
-    const failures = await Failure.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const { search, status, project, technology, category } = req.query;
+
+    const query = { user: req.user._id };
+
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      query.$or = [
+        { title: searchRegex },
+        { errorMessage: searchRegex },
+        { project: searchRegex },
+        { technology: searchRegex }
+      ];
+    }
+
+    if (status && status.trim()) {
+      query.status = status.trim();
+    }
+
+    if (project && project.trim()) {
+      query.project = new RegExp(`^${project.trim()}$`, 'i');
+    }
+
+    if (technology && technology.trim()) {
+      query.technology = new RegExp(technology.trim(), 'i');
+    }
+
+    if (category && category.trim()) {
+      query.category = new RegExp(`^${category.trim()}$`, 'i');
+    }
+
+    const failures = await Failure.find(query).sort({ createdAt: -1 });
     res.status(200).json(failures);
   } catch (error) {
     console.error('Get failures error:', error);
@@ -153,10 +183,51 @@ const deleteFailure = async (req, res) => {
   }
 };
 
+// @desc    Add a debugging attempt to a failure
+// @route   POST /api/failures/:id/attempts
+// @access  Private
+const addAttempt = async (req, res) => {
+  try {
+    const failure = await Failure.findOne({ _id: req.params.id, user: req.user._id });
+    if (!failure) {
+      return res.status(404).json({ message: 'Failure entry not found' });
+    }
+
+    const { action, result, notes } = req.body;
+
+    if (!action || !action.trim()) {
+      return res.status(400).json({ message: 'Attempt action is required' });
+    }
+    if (!result || !result.trim()) {
+      return res.status(400).json({ message: 'Attempt result is required' });
+    }
+
+    const newAttempt = {
+      action: action.trim(),
+      result: result.trim(),
+      notes: notes ? notes.trim() : '',
+      timestamp: new Date()
+    };
+
+    failure.attempts.push(newAttempt);
+    failure.updatedAt = new Date();
+
+    const updatedFailure = await failure.save();
+    res.status(200).json(updatedFailure);
+  } catch (error) {
+    console.error('Add attempt error:', error);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'Invalid failure ID format' });
+    }
+    res.status(500).json({ message: 'Server error adding debugging attempt' });
+  }
+};
+
 module.exports = {
   createFailure,
   getFailures,
   getFailureById,
   updateFailure,
-  deleteFailure
+  deleteFailure,
+  addAttempt
 };

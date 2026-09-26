@@ -5,7 +5,8 @@ const {
   getFailures,
   getFailureById,
   updateFailure,
-  deleteFailure
+  deleteFailure,
+  addAttempt
 } = require('../controllers/failure.controller');
 const { protect } = require('../middleware/auth.middleware');
 
@@ -17,5 +18,6 @@ router.get('/', getFailures);
 router.get('/:id', getFailureById);
 router.put('/:id', updateFailure);
 router.delete('/:id', deleteFailure);
+router.post('/:id/attempts', addAttempt);
 
 module.exports = router;

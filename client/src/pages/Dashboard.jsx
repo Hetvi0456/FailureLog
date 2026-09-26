@@ -271,16 +271,16 @@ const Dashboard = () => {
         <div className="empty-state">
           {isFilterActive ? (
             <>
-              <p>No failure entries match your active search or filters.</p>
+              <p>No failures match your active search or filters.</p>
               <button onClick={handleClearFilters} className="btn-secondary">
-                Reset Filters
+                Clear Filters
               </button>
             </>
           ) : (
             <>
-              <p>No failure entries logged yet.</p>
-              <Link to="/failures/new" className="btn-secondary">
-                Log your first failure
+              <p>You haven't logged any failures yet.</p>
+              <Link to="/failures/new" className="btn-primary">
+                Log Your First Failure
               </Link>
             </>
           )}

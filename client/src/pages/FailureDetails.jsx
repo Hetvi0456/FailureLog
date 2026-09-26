@@ -166,41 +166,6 @@ const FailureDetails = () => {
           </div>
         )}
 
-        {/* Resolution Section */}
-        <div className={`resolution-box-wrapper ${failure.status === 'resolved' ? 'resolved-active' : ''}`}>
-          <div className="resolution-header">
-            <h3>Resolution Details</h3>
-            {failure.resolvedAt && (
-              <span className="resolved-date-badge">
-                ✅ Resolved on {new Date(failure.resolvedAt).toLocaleDateString()}
-              </span>
-            )}
-          </div>
-          <div className="detail-grid">
-            <div className="detail-section">
-              <span className="box-sublabel">Root Cause</span>
-              <div className="content-box">
-                {failure.rootCause ? (
-                  <p>{failure.rootCause}</p>
-                ) : (
-                  <p className="placeholder-text">No root cause recorded yet.</p>
-                )}
-              </div>
-            </div>
-
-            <div className="detail-section">
-              <span className="box-sublabel">Definitive Working Solution</span>
-              <div className="content-box solution-box">
-                {failure.solution ? (
-                  <p>{failure.solution}</p>
-                ) : (
-                  <p className="placeholder-text">No solution recorded yet.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Debugging Timeline Section */}
         <div className="detail-section timeline-container">
           <div className="timeline-header">
@@ -218,10 +183,10 @@ const FailureDetails = () => {
                     </span>
                   </div>
                   <p className="attempt-action">
-                    <strong>Action Taken:</strong> {attempt.action}
+                    <strong>Action:</strong> {attempt.action}
                   </p>
                   <p className="attempt-result">
-                    <strong>Outcome / Result:</strong> {attempt.result}
+                    <strong>Result:</strong> {attempt.result}
                   </p>
                   {attempt.notes && (
                     <p className="attempt-notes">
@@ -233,7 +198,7 @@ const FailureDetails = () => {
             </div>
           ) : (
             <p className="placeholder-text empty-timeline-msg">
-              No step-by-step debugging attempts logged yet for this failure.
+              No debugging attempts recorded yet for this failure.
             </p>
           )}
 
@@ -246,7 +211,7 @@ const FailureDetails = () => {
             <form onSubmit={handleAddAttempt} className="attempt-form">
               <div className="form-group">
                 <label htmlFor="attemptAction">
-                  Action Taken <span className="required">*</span>
+                  Action <span className="required">*</span>
                 </label>
                 <input
                   id="attemptAction"
@@ -260,7 +225,7 @@ const FailureDetails = () => {
 
               <div className="form-group">
                 <label htmlFor="attemptResult">
-                  Outcome / Result <span className="required">*</span>
+                  Result <span className="required">*</span>
                 </label>
                 <input
                   id="attemptResult"
@@ -273,7 +238,7 @@ const FailureDetails = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="attemptNotes">Additional Notes (Optional)</label>
+                <label htmlFor="attemptNotes">Notes (Optional)</label>
                 <textarea
                   id="attemptNotes"
                   rows={2}
@@ -294,13 +259,48 @@ const FailureDetails = () => {
           </div>
         </div>
 
+        {/* Resolution Section */}
+        <div className={`resolution-box-wrapper ${failure.status === 'resolved' ? 'resolved-active' : ''}`}>
+          <div className="resolution-header">
+            <h3>Resolution</h3>
+            {failure.resolvedAt && (
+              <span className="resolved-date-badge">
+                ✅ Resolved on {new Date(failure.resolvedAt).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+          <div className="detail-grid">
+            <div className="detail-section">
+              <span className="box-sublabel">Root Cause</span>
+              <div className="content-box">
+                {failure.rootCause ? (
+                  <p>{failure.rootCause}</p>
+                ) : (
+                  <p className="placeholder-text">No root cause recorded yet.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="detail-section">
+              <span className="box-sublabel">Solution</span>
+              <div className="content-box solution-box">
+                {failure.solution ? (
+                  <p>{failure.solution}</p>
+                ) : (
+                  <p className="placeholder-text">No solution recorded yet.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Timestamps Footer */}
         <div className="timestamps-footer">
           <span>Created: {new Date(failure.createdAt).toLocaleString()}</span>
           <span>Last Updated: {new Date(failure.updatedAt).toLocaleString()}</span>
           {failure.resolvedAt && (
             <span className="resolved-date">
-              Resolved: {new Date(failure.resolvedAt).toLocaleString()}
+              Resolved At: {new Date(failure.resolvedAt).toLocaleString()}
             </span>
           )}
         </div>

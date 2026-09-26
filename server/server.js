@@ -2,7 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const { connectDB } = require('./config/db');
+
 const healthRoutes = require('./routes/health.routes');
+const authRoutes = require('./routes/auth.routes');
+const failureRoutes = require('./routes/failure.routes');
 
 // Load environment variables
 dotenv.config();
@@ -19,6 +22,14 @@ connectDB();
 
 // API Routes
 app.use('/api', healthRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/failures', failureRoutes);
+
+// Global Error Handler Fallback
+app.use((err, req, res, next) => {
+  console.error('Unhandled Server Error:', err);
+  res.status(500).json({ message: 'Internal Server Error' });
+});
 
 // Server Listening
 app.listen(PORT, () => {

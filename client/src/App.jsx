@@ -1,100 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
+
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import CreateFailure from './pages/CreateFailure';
+import EditFailure from './pages/EditFailure';
+import FailureDetails from './pages/FailureDetails';
 
 function App() {
-  const [health, setHealth] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchHealth = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/health');
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status} ${res.statusText}`);
-      }
-      const data = await res.json();
-      setHealth(data);
-    } catch (err) {
-      setError(err.message || 'Failed to connect to backend server');
-      setHealth(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchHealth();
-  }, []);
-
   return (
-    <div className="container">
-      <div className="header">
-        <h1>🐞 FailureLog</h1>
-        <p>Phase 1 Technical Verification & Health Check</p>
-      </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="app-layout">
+          <Navbar />
+          <main className="main-content">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-      <div className="status-grid">
-        <div className="status-card">
-          <span className="label">Express API</span>
-          <div className="status-indicator">
-            <span
-              className={`dot ${
-                loading
-                  ? 'pending'
-                  : error
-                  ? 'error'
-                  : health?.status === 'ok'
-                  ? 'ok'
-                  : 'error'
-              }`}
-            ></span>
-            <span>
-              {loading ? 'Checking...' : error ? 'Offline' : health?.status || 'Unknown'}
-            </span>
-          </div>
+              {/* Protected Routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/failures/new"
+                element={
+                  <ProtectedRoute>
+                    <CreateFailure />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/failures/:id"
+                element={
+                  <ProtectedRoute>
+                    <FailureDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/failures/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <EditFailure />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Redirect root to dashboard */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </main>
         </div>
-
-        <div className="status-card">
-          <span className="label">MongoDB Atlas</span>
-          <div className="status-indicator">
-            <span
-              className={`dot ${
-                loading
-                  ? 'pending'
-                  : error
-                  ? 'disconnected'
-                  : health?.database === 'connected'
-                  ? 'connected'
-                  : 'disconnected'
-              }`}
-            ></span>
-            <span>
-              {loading
-                ? 'Checking...'
-                : error
-                ? 'Disconnected'
-                : health?.database || 'Disconnected'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="info-box">
-        <p><strong>Response Payload:</strong></p>
-        <pre>
-          {loading
-            ? 'Fetching status...'
-            : error
-            ? JSON.stringify({ error }, null, 2)
-            : JSON.stringify(health, null, 2)}
-        </pre>
-      </div>
-
-      <button className="refresh-btn" onClick={fetchHealth} disabled={loading}>
-        {loading ? 'Refreshing...' : 'Re-check Connection'}
-      </button>
-    </div>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
